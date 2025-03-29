@@ -1,57 +1,64 @@
 # Validator Analytics Script
 
-This script has been inspired by Jesucripto13 work, you can find it here: https://github.com/Jesucripto13/beam-validator-reports.
-It retrieves and processes validators data, including node delegations and BEAM stakes, from BEAM L1 subnet on AVAX. It's designed to help you analyze validator activity and generate reports.
+This script has been inspired by Jesucripto13's work, which you can find here: https://github.com/Jesucripto13/beam-validator-reports.
+
+It retrieves and processes validator data from BEAM L1 subnet on AVAX, including node delegations and BEAM stakes. This optimized version ensures accurate counting while improving performance.
+
+## Key Features
+
+- **Accurate Node Delegation Counting**: Uses sequential processing with unique token tracking
+- **Asynchronous Processing**: Leverages asyncio and aiohttp for non-blocking API requests
+- **Performance Optimizations**: Maintains transaction receipt cache to reduce redundant calls
+- **Improved Error Handling**: Better validation and edge case management
+- **Organized Output**: Separate report files for different data types
 
 ## Prerequisites
 
 * **Python 3.x:** Ensure you have Python 3 installed on your system.
 * **BEAM L1 subnet:** This script assumes you insert Node-ID for a running validator.
 * **Python Libraries:** Install the required libraries using pip:
-
     ```bash
-    pip install requests base58
+    pip install requests base58 asyncio aiohttp
     ```
 
 ## Configuration
 
-1.  **Network URL:** The script now prompts you for the IP address and port. If you want to use the default values (localhost:9650), just press Enter.
-2.  **Subnet ID:** The subnet ID is hardcoded in the script, if you need to change it please modify the following line in the `get_validation_id` function:
-
+1. **Network URL:** The script prompts you for the IP address and port. If you want to use the default values (localhost:9650), just press Enter.
+2. **Subnet ID:** The subnet ID is hardcoded in the script. If you need to change it, modify the URL in the `main` function:
     ```python
-    url = "[http://127.0.0.1:9650/ext/bc/2tmrrBo1Lgt1mzzvPSFt73kkQKFas5d1AP88tv9cicwoFp8BSn/validators](http://127.0.0.1:9650/ext/bc/2tmrrBo1Lgt1mzzvPSFt73kkQKFas5d1AP88tv9cicwoFp8BSn/validators)"
+    url = f"http://{ip_address}:{port}/ext/bc/2tmrrBo1Lgt1mzzvPSFt73kkQKFas5d1AP88tv9cicwoFp8BSn/rpc"
     ```
-
     Change the `2tmrrBo1Lgt1mzzvPSFt73kkQKFas5d1AP88tv9cicwoFp8BSn` to your subnet ID.
-3.  **Log and Report Files:** The script creates `[Node-ID]_validator_report.log` and `[Node-ID]_validator_report.json` files in the same directory. The name of the file will be the Node-ID that you provided.
+3. **Rate Limiting:** You can adjust `RATE_LIMIT_DELAY` and `MAX_CONCURRENT_REQUESTS` at the top of the script to optimize for your environment.
+4. **Output Files:** The script creates separate files for logs and reports:
+   - `[Node-ID]_validator_report.log` - Detailed execution log
+   - `[Node-ID]_validator_report_delegations.json` - Node delegation report
+   - `[Node-ID]_validator_report_stakes.json` - BEAM stakes report
 
 ## Usage
 
-1.  **Run the Script:**
-
+1. **Run the Script:**
     ```bash
     python3 validator_analytics.py
     ```
+2. **Enter IP Address and Port:** Enter the IP address and port of the Avalanche node, or press Enter for defaults.
+3. **Enter Node-ID:** Provide the Node-ID of the validator you want to analyze.
+4. **Choose Processing Options:** Select whether to process node delegations, BEAM stakes, or both.
+5. **Enter Validator Stake (if applicable):** If processing BEAM stakes, enter the validator's BEAM stake.
+6. **View Reports:** Generated reports will be saved in JSON format in the current directory.
 
-2.  **Enter IP Address and Port:** The script will prompt you to enter the IP address and port of the Avalanche node. If you want to use the default values (localhost:9650), just press Enter.
-3.  **Enter Node-ID:** The script will prompt you to enter the Node-ID of the validator you want to analyze.
-4.  **Choose Processing Options:** The script will ask you to choose whether to process node delegations, BEAM stakes, or both.
-5.  **Enter Validator Stake (if applicable):** If you choose to process BEAM stakes, you'll be prompted to enter the validator's BEAM stake.
-6.  **View Reports:** The script will generate a report in `[Node-ID]_validator_report.json` and log messages in `[Node-ID]_validator_report.log`.
+## Technical Details
 
-## Script Functionality
+The script uses a two-pass log processing approach for node delegations:
+1. First pass identifies the wallet address
+2. Second pass collects token IDs associated with the wallet
+3. Unique (wallet, token_id) pairs are tracked to prevent double counting
 
-* **`get_validation_id(node_id)`:** Retrieves the validationID from the provided Node-ID.
-* **`convert_validation_id(validation_id)`:** Converts the validationID from Base58 to hexadecimal format.
-* **`process_node_delegations(validation_id_hex)`:** Processes node delegations and generates a report.
-* **`process_beam_stakes(validation_id_hex, validator_stake)`:** Processes BEAM stakes and generates a report.
-* **`generate_node_delegation_report(node_delegations)`:** Generates a JSON report for node delegations.
-* **`generate_beam_stake_report(beam_stakes, validator_stake)`:** Generates a JSON report for BEAM stakes.
+BEAM stake processing utilizes concurrent API requests with a semaphore to control the level of parallelism while maintaining data integrity.
 
 ## Delegations
 
 If you would like to delegate your BEAM nodes or BEAM tokens to my validator, I would be very grateful. My validator details are:
-
 * **Validator Name:** sir\_boolean
 * **Node-ID:** NodeID-CEsABmctyhhNGQHbPGCRaAyejHEiAD1NU
 
