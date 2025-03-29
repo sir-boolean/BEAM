@@ -1,5 +1,5 @@
 # Validator Analytics Script
-test
+
 This script has been inspired by Jesucripto13 work, you can find it here: https://github.com/Jesucripto13/beam-validator-reports.
 Ii retrieves and processes validators data, including node delegations and BEAM stakes, from BEAM L1 subnet on AVAX. It's designed to help you analyze validator activity and generate reports.
 
